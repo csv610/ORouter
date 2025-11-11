@@ -1,10 +1,11 @@
-.PHONY: help venv install install-dev test format lint type-check clean build push
+.PHONY: help venv act install install-dev test format lint type-check clean build push
 
 help:
 	@echo "OpenRouter Python Client - Development Commands"
 	@echo ""
 	@echo "Setup:"
 	@echo "  make venv          - Create virtual environment"
+	@echo "  make act           - Activate virtual environment"
 	@echo "  make install       - Install core dependencies"
 	@echo "  make install-dev   - Install dependencies including dev tools"
 	@echo ""
@@ -27,6 +28,9 @@ venv:
 	python -m venv venv
 	@echo "✓ Virtual environment created!"
 	@echo "Activate it with: source venv/bin/activate (or venv\\Scripts\\activate on Windows)"
+
+act:
+	@bash -c "source venv/bin/activate && exec bash"
 
 install:
 	pip install -r requirements.txt
