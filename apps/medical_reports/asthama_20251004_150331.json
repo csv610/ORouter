@@ -1,0 +1,143 @@
+{
+  "condition_name": "Asthma",
+  "summary": "Asthma is a chronic respiratory condition characterized by inflammation and narrowing of the airways, leading to difficulty breathing. It affects people of all ages but often starts in childhood. Asthma can be managed with proper treatment, but it requires ongoing care to prevent severe attacks.",
+  "category": "Respiratory",
+  "icd_codes": [
+    "J45.909"
+  ],
+  "pathophysiology": "Asthma is caused by chronic inflammation of the airways, leading to bronchial hyperresponsiveness. This inflammation results in swelling of the airway walls, increased mucus production, and bronchoconstriction. The combination of these factors narrows the airways, making it difficult to breathe. Triggers such as allergens, exercise, or infections can exacerbate these symptoms.",
+  "etiology": [
+    "Genetic predisposition",
+    "Environmental allergens (e.g., pollen, dust mites, pet dander)",
+    "Air pollution",
+    "Respiratory infections",
+    "Smoking or exposure to secondhand smoke",
+    "Occupational exposures (e.g., chemicals, dust)"
+  ],
+  "types": [
+    "Allergic asthma: Triggered by allergens",
+    "Non-allergic asthma: Triggered by non-allergic factors such as exercise, cold air, or stress",
+    "Occupational asthma: Caused by workplace exposures",
+    "Aspirin-exacerbated respiratory disease: Triggered by aspirin and other NSAIDs"
+  ],
+  "stages": [
+    "Intermittent asthma: Symptoms occur less than twice a week and nighttime symptoms less than twice a month",
+    "Mild persistent asthma: Symptoms occur more than twice a week but less than once a day",
+    "Moderate persistent asthma: Symptoms occur daily and nighttime symptoms more than once a week",
+    "Severe persistent asthma: Symptoms occur throughout the day and nighttime symptoms frequently"
+  ],
+  "epidemiology": {
+    "prevalence": "Affects approximately 25 million people in the United States",
+    "incidence": "About 10 people per 1,000 annually in the United States",
+    "risk_factors": [
+      "Family history of asthma or allergies",
+      "Exposure to tobacco smoke",
+      "Obesity",
+      "Living in urban areas with high pollution",
+      "Low birth weight"
+    ],
+    "demographics": "More common in children, but can occur at any age. Higher prevalence in males during childhood and in females during adulthood."
+  },
+  "clinical_presentation": {
+    "symptoms": [
+      "Shortness of breath",
+      "Wheezing",
+      "Chest tightness",
+      "Coughing, especially at night or early morning",
+      "Difficulty breathing during physical activity"
+    ],
+    "signs": [
+      "Wheezing on auscultation",
+      "Prolonged expiratory phase",
+      "Use of accessory muscles for breathing",
+      "Decreased peak expiratory flow rate",
+      "Tachypnea (increased respiratory rate)"
+    ],
+    "onset": "Symptoms can start suddenly or gradually, often triggered by specific factors. Common age of onset is childhood, but it can develop at any age.",
+    "severity_spectrum": "Mild: Symptoms occur infrequently and are easily managed. Moderate: Symptoms occur more frequently and require regular medication. Severe: Symptoms are persistent and require multiple medications for control."
+  },
+  "diagnosis": {
+    "clinical_criteria": [
+      "Spirometry showing reversible airflow obstruction",
+      "Peak expiratory flow rate variability",
+      "Bronchoprovocation testing"
+    ],
+    "laboratory_tests": [
+      "Spirometry: FEV1/FVC ratio <0.80",
+      "Peak expiratory flow (PEF) monitoring: Variability >20%",
+      "Allergy testing: Skin prick tests or blood tests for specific IgE"
+    ],
+    "imaging_studies": [
+      "Chest X-ray: To rule out other conditions like pneumonia",
+      "CT scan: To assess for structural abnormalities"
+    ],
+    "differential_diagnosis": [
+      "Chronic obstructive pulmonary disease (COPD): More common in older adults with a history of smoking",
+      "Bronchiectasis: Persistent cough with sputum production",
+      "Heart failure: Can cause shortness of breath and wheezing",
+      "Gastroesophageal reflux disease (GERD): Can mimic asthma symptoms"
+    ],
+    "gold_standard": "Spirometry with bronchodilator reversibility testing is the gold standard for diagnosing asthma."
+  },
+  "treatment": {
+    "pharmacological": [
+      "Short-acting beta-agonists (SABA): Albuterol 90 mcg per puff, 1-2 puffs every 4-6 hours as needed",
+      "Inhaled corticosteroids (ICS): Fluticasone 100-500 mcg daily",
+      "Long-acting beta-agonists (LABA): Salmeterol 50 mcg twice daily",
+      "Leukotriene modifiers: Montelukast 10 mg daily",
+      "Oral corticosteroids: Prednisone 40-60 mg daily for acute exacerbations"
+    ],
+    "non_pharmacological": [
+      "Avoidance of triggers: Allergen avoidance, smoking cessation",
+      "Breathing exercises: Pursed-lip breathing, diaphragmatic breathing",
+      "Allergy immunotherapy: Allergy shots to reduce sensitivity to allergens"
+    ],
+    "surgical": [
+      "Bronchial thermoplasty: For severe asthma not controlled by medications"
+    ],
+    "lifestyle_modifications": [
+      "Regular exercise to improve lung function",
+      "Maintaining a healthy weight",
+      "Avoiding exposure to smoke and pollutants"
+    ],
+    "first_line": "Inhaled corticosteroids are the first-line maintenance treatment for persistent asthma.",
+    "duration": "Long-term management with regular follow-up and adjustment of medications as needed."
+  },
+  "complications": [
+    "Asthma exacerbations requiring hospitalization",
+    "Permanent narrowing of the airways (airway remodeling)",
+    "Respiratory failure",
+    "Pneumothorax",
+    "Side effects from long-term use of corticosteroids"
+  ],
+  "prognosis": {
+    "overall_prognosis": "With proper management, most people with asthma can lead normal, active lives. Severe, uncontrolled asthma can lead to frequent hospitalizations and reduced quality of life.",
+    "factors_affecting_outcome": [
+      "Adherence to medication regimen",
+      "Avoidance of triggers",
+      "Regular follow-up with a healthcare provider",
+      "Severity of asthma at diagnosis"
+    ],
+    "survival_rates": "With proper management, the majority of individuals with asthma have a normal lifespan.",
+    "chronic_considerations": "Regular monitoring of lung function and adjustment of medications to prevent exacerbations."
+  },
+  "prevention": [
+    "Avoidance of known allergens and irritants",
+    "Vaccination against respiratory infections (e.g., influenza, pneumococcal)",
+    "Maintaining a healthy lifestyle to reduce the risk of obesity"
+  ],
+  "related_conditions": [
+    "Allergic rhinitis: Often coexists with asthma",
+    "Eczema: Common in individuals with asthma",
+    "Chronic obstructive pulmonary disease (COPD): Can coexist in older adults"
+  ],
+  "key_considerations": [
+    "Asthma action plans are essential for managing exacerbations",
+    "Regular use of inhaled corticosteroids is crucial for long-term control",
+    "Patients should be educated on the proper use of inhalers"
+  ],
+  "references": [
+    "Global Initiative for Asthma (GINA) Guidelines",
+    "National Asthma Education and Prevention Program (NAEPP)"
+  ]
+}

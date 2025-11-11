@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: OpenRouter Documentation
+    url: https://openrouter.ai/docs
+    about: Official OpenRouter API documentation
+  - name: Discussion & Questions
+    url: https://github.com/csv610/ORouter/discussions
+    about: Ask questions and discuss ideas

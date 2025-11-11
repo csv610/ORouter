@@ -131,8 +131,16 @@ dmypy.json
 .DS_Store
 
 # Project-specific
+# Exclude JSON files but allow sample data in apps/medical_reports/
 *.json
+!apps/medical_reports/*.json
+
+# Environment and virtual environments
 orouterenv/
 venv/
+.env
 .env.local
 .env.*.local
+
+# IDE and editor files
+Thumbs.db

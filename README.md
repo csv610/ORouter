@@ -28,8 +28,8 @@ A Python library for interacting with [OpenRouter](https://openrouter.ai/) - a f
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/openrouter-python.git
-cd openrouter-python
+git clone https://github.com/csv610/ORouter.git
+cd ORouter
 ```
 
 2. Create and activate a virtual environment:
@@ -162,7 +162,7 @@ Vision model support is coming soon!
 ## Project Structure
 
 ```
-openrouter-python/
+ORouter/
 ├── apps/
 │   ├── openrouter_client.py        # Main client library
 │   ├── cli_text_client.py          # CLI for text queries
@@ -174,7 +174,7 @@ openrouter-python/
 │   └── medical_reports/            # Sample medical data
 ├── openrouter/                     # Package module (extensible)
 ├── requirements.txt                # Python dependencies
-├── setup.py                        # Package setup
+├── pyproject.toml                  # Package configuration
 ├── LICENSE                         # MIT License
 └── README.md                       # This file
 ```

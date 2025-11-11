@@ -1,0 +1,143 @@
+{
+  "condition_name": "Asthma",
+  "summary": "Asthma is a chronic inflammatory disease of the airways characterized by variable and recurring symptoms, reversible airflow obstruction, and bronchospasm. It is a common condition that affects people of all ages and can be managed with proper treatment.",
+  "category": "Respiratory",
+  "icd_codes": [
+    "J45.909",
+    "J45.998",
+    "J45.999"
+  ],
+  "pathophysiology": "Asthma is characterized by chronic inflammation of the airways, which leads to airway hyperresponsiveness, mucus production, and airway remodeling. This results in narrowing of the airways, making it difficult to breathe. The inflammation is typically driven by a combination of genetic and environmental factors.",
+  "etiology": [
+    "Genetic predisposition",
+    "Environmental factors (e.g., allergens, pollutants)",
+    "Respiratory infections",
+    "Occupational exposures",
+    "Smoking"
+  ],
+  "types": [
+    "Allergic asthma",
+    "Non-allergic asthma",
+    "Occupational asthma",
+    "Exercise-induced asthma",
+    "Nocturnal asthma"
+  ],
+  "stages": [
+    "Intermittent",
+    "Mild persistent",
+    "Moderate persistent",
+    "Severe persistent"
+  ],
+  "epidemiology": {
+    "prevalence": "Asthma affects approximately 300 million people worldwide.",
+    "incidence": "The incidence of asthma is higher in children and young adults.",
+    "risk_factors": [
+      "Family history of asthma or allergies",
+      "Exposure to allergens (e.g., dust mites, pollen, pet dander)",
+      "Exposure to tobacco smoke",
+      "Air pollution",
+      "Obesity"
+    ],
+    "demographics": "Asthma is more common in children and young adults, and it affects both males and females."
+  },
+  "clinical_presentation": {
+    "symptoms": [
+      "Shortness of breath",
+      "Wheezing",
+      "Chest tightness",
+      "Coughing (often worse at night or early morning)",
+      "Difficulty breathing during physical activity"
+    ],
+    "signs": [
+      "Wheezing heard during auscultation",
+      "Use of accessory muscles for breathing",
+      "Prolonged exhalation",
+      "Decreased breath sounds"
+    ],
+    "onset": "Symptoms can be intermittent or persistent, often triggered by allergens, exercise, or respiratory infections.",
+    "severity_spectrum": "Symptoms can range from mild to severe, with severe cases leading to asthma attacks that require immediate medical attention."
+  },
+  "diagnosis": {
+    "clinical_criteria": [
+      "Recurrent symptoms of airflow obstruction",
+      "Variable airflow limitation",
+      "Airway hyperresponsiveness"
+    ],
+    "laboratory_tests": [
+      "Sputum eosinophil count",
+      "Blood tests for allergies"
+    ],
+    "imaging_studies": [
+      "Chest X-ray (to rule out other conditions)",
+      "CT scan (in severe cases)"
+    ],
+    "differential_diagnosis": [
+      "Chronic obstructive pulmonary disease (COPD)",
+      "Bronchiectasis",
+      "Heart failure",
+      "Gastroesophageal reflux disease (GERD)"
+    ],
+    "gold_standard": "Spirometry with bronchodilator reversibility testing"
+  },
+  "treatment": {
+    "pharmacological": [
+      "Short-acting beta-agonists (SABAs) for quick relief",
+      "Inhaled corticosteroids (ICS) for long-term control",
+      "Long-acting beta-agonists (LABAs) in combination with ICS",
+      "Leukotriene modifiers",
+      "Oral corticosteroids for severe exacerbations"
+    ],
+    "non_pharmacological": [
+      "Avoidance of triggers (e.g., allergens, smoke)",
+      "Breathing exercises",
+      "Allergy immunotherapy"
+    ],
+    "surgical": [
+      "Bronchial thermoplasty (in severe cases)"
+    ],
+    "lifestyle_modifications": [
+      "Regular exercise",
+      "Maintaining a healthy weight",
+      "Avoiding smoking and secondhand smoke"
+    ],
+    "first_line": "Inhaled corticosteroids",
+    "duration": "Long-term management with regular follow-up"
+  },
+  "complications": [
+    "Asthma exacerbations",
+    "Respiratory failure",
+    "Pneumonia",
+    "Pulmonary hypertension",
+    "Side effects from long-term medication use"
+  ],
+  "prognosis": {
+    "overall_prognosis": "Most people with asthma can lead normal lives with proper management.",
+    "factors_affecting_outcome": [
+      "Severity of asthma",
+      "Adherence to treatment",
+      "Identification and avoidance of triggers"
+    ],
+    "survival_rates": "With proper management, asthma does not typically affect life expectancy.",
+    "chronic_considerations": "Chronic asthma can lead to airway remodeling and persistent symptoms if not well-managed."
+  },
+  "prevention": [
+    "Avoiding known allergens and irritants",
+    "Vaccinations (e.g., flu vaccine, pneumococcal vaccine)",
+    "Maintaining a healthy lifestyle"
+  ],
+  "related_conditions": [
+    "Allergic rhinitis",
+    "Eczema",
+    "Chronic obstructive pulmonary disease (COPD)"
+  ],
+  "key_considerations": [
+    "Regular monitoring and adjustment of treatment",
+    "Patient education on trigger avoidance",
+    "Emergency action plan for asthma attacks"
+  ],
+  "references": [
+    "Global Initiative for Asthma (GINA) guidelines",
+    "American Thoracic Society (ATS) guidelines",
+    "World Health Organization (WHO) reports on asthma"
+  ]
+}

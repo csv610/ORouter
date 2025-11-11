@@ -10,7 +10,7 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.8"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "OpenRouter Python Contributors"}
 ]
 keywords = ["openrouter", "ai", "llm", "chatgpt", "api", "client"]
 classifiers = [
@@ -44,10 +44,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/openrouter-python"
-Documentation = "https://github.com/yourusername/openrouter-python#readme"
-Repository = "https://github.com/yourusername/openrouter-python.git"
-Issues = "https://github.com/yourusername/openrouter-python/issues"
+Homepage = "https://github.com/csv610/ORouter"
+Documentation = "https://github.com/csv610/ORouter#readme"
+Repository = "https://github.com/csv610/ORouter.git"
+Issues = "https://github.com/csv610/ORouter/issues"
 
 [project.scripts]
 openrouter-cli = "apps.cli_text_client:main"
