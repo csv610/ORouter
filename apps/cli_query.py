@@ -9,33 +9,38 @@ client = OpenAI(
   api_key= os.getenv("OPENROUTER_API_KEY")
 )
 
-MODELS = {
+TEXT_MODELS = {
     "deepseek": "deepseek/deepseek-chat-v3.1:free",
     "deepseek-r1": "deepseek/deepseek-r1:free",
-    "gemma27b": "google/gemma-3-27b-it:free",
     "glm": "z-ai/glm-4.5-air:free",
     "gpt-oss": "openai/gpt-oss-20b:free",
     "gemma3n": "google/gemma-3n-e4b-it:free",
     "grok": "x-ai/grok-4-fast:free",
-    "haiku": "anthropic/claude-haiku-4.5",
     "hunyuan": "tencent/hunyuan-a13b-instruct:free",
     "kimi": "moonshotai/kimi-dev-72b:free",
     "llama3": "meta-llama/llama-3.3-8b-instruct:free",
-    "llama4": "meta-llama/llama-4-maverick:free",
-    "mistral": "mistralai/mistral-small-3.2-24b-instruct:free",
     "minimax": "minimax/minimax-m2:free",
     "nemotron9b": "nvidia/nemotron-nano-9b-v2:free",
     "nemotron12b": "nvidia/nemotron-nano-12b-v2-vl:free",
     "qwen-14b": "qwen/qwen3-14b:free",
     "qwen-30b": "qwen/qwen3-30b-a3b:free",
     "qwen-235b": "qwen/qwen3-235b-a22b:free",
-    "sonnet"   : "anthropic/claude-sonnet-4.5",
-    "sonar": "perplexity/sonar", 
-    "sonar-pro": "perplexity/sonar-pro", 
-    "sonar-research": "perplexity/sonar-deep-research",
-    "sonar-search": "perplexity/sonar-pro-search",
-    "sonar-reason": "perplexity/sonar-reasoning-pro",
-}
+}       
+
+VISION_MODELS = {                                                      
+    "llama4": "meta-llama/llama-4-maverick:free",                      
+    "gemma27b": "google/gemma-3-27b-it:free",                          
+    "mistral": "mistralai/mistral-small-3.2-24b-instruct:free",        
+    "haiku": "anthropic/claude-haiku-4.5",                             
+    "sonnet"   : "anthropic/claude-sonnet-4.5",                        
+    "sonar": "perplexity/sonar",                                       
+    "sonar-pro": "perplexity/sonar-pro",                               
+    "sonar-research": "perplexity/sonar-deep-research",                
+    "sonar-search": "perplexity/sonar-pro-search",                     
+    "sonar-reason": "perplexity/sonar-reasoning-pro",                  
+}                                                                      
+
+MODELS = TEXT_MODELS + VISION_MODELS                                   
 
 def ask_llm(query, model_name="deepseek"):
     """
@@ -60,7 +65,6 @@ def ask_llm(query, model_name="deepseek"):
     }
     content = [text_part]
 
-    """
     image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg"
 
     # Build content array - only add image if URL is present
@@ -72,7 +76,6 @@ def ask_llm(query, model_name="deepseek"):
         }
       }
       content.append(image_part)
-    """
 
     completion = client.chat.completions.create(
       extra_body={},
