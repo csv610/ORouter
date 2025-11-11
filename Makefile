@@ -25,12 +25,12 @@ help:
 	@echo ""
 
 venv:
-	python -m venv venv
+	python -m venv orouterenv
 	@echo "✓ Virtual environment created!"
-	@echo "Activate it with: source venv/bin/activate (or venv\\Scripts\\activate on Windows)"
+	@echo "Activate it with: source orouterenv/bin/activate (or orouterenv\\Scripts\\activate on Windows)"
 
 act:
-	@bash -c "source venv/bin/activate && exec bash"
+	@bash -c "source orouterenv/bin/activate && exec bash"
 
 install:
 	pip install -r requirements.txt
