@@ -166,7 +166,7 @@ def test_nested_structured():
         return False
 
 def test_list_structured():
-    """Test generating a list of structured outputs."""
+    """Test generating a list of structured outputs with wrapper model."""
     print("=" * 60)
     print("TEST 4: List of Structured Output (People)")
     print("=" * 60)
@@ -175,11 +175,15 @@ def test_list_structured():
         client = OpenRouterClient()
         prompt = "Create 3 different people: a doctor, a teacher, and a chef. Each should have realistic names, ages, and occupations."
 
-        results = client.generate_structured_list(
+        class PeopleList(BaseModel):
+            items: List[Person]
+
+        result = client.generate_structured(
             user_prompt=prompt,
-            item_model=Person,
+            response_model=PeopleList,
             model="sonnet"
         )
+        results = result.items
 
         print(f"Prompt: {prompt}")
         print(f"\nStructured Output ({len(results)} items):")

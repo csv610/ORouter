@@ -236,36 +236,6 @@ class OpenRouterClient:
             f"Last error: {str(last_error)}"
         )
 
-    def generate_structured_list(
-        self,
-        user_prompt: str,
-        item_model: Type[T],
-        model: Optional[str] = None,
-        max_retries: int = 3,
-    ) -> List[T]:
-        """Generate a list of structured outputs.
-
-        Args:
-            user_prompt: The user's message/prompt
-            item_model: Pydantic model class for each item in the list
-            model: Optional model identifier (uses current_model if None)
-            max_retries: Maximum number of retry attempts
-
-        Returns:
-            List of validated item_model instances
-        """
-
-        class ListWrapper(BaseModel):
-            items: List[item_model]
-
-        result = self.generate_structured(
-            user_prompt=user_prompt,
-            response_model=ListWrapper,
-            model=model,
-            max_retries=max_retries,
-        )
-        return result.items
-
     @staticmethod
     def _extract_json(text: str) -> str:
         """Extract JSON from text, handling markdown code blocks."""

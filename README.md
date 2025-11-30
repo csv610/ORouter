@@ -95,11 +95,17 @@ person = client.generate_structured(
 print(f"{person.name} is {person.age} and works as a {person.occupation}")
 
 # List of structured outputs
-people = client.generate_structured_list(
+from typing import List
+
+class PeopleList(BaseModel):
+    items: List[Person]
+
+result = client.generate_structured(
     user_prompt="Create 3 people",
-    item_model=Person,
+    response_model=PeopleList,
     model="sonnet"
 )
+people = result.items
 
 # Custom configuration
 config = ModelConfig(
@@ -200,12 +206,6 @@ Use aliases for convenience or full model IDs:
 - `max_retries`: Maximum number of retry attempts for validation failures
 - Returns instance of response_model populated with validated API response
 
-**`generate_structured_list(user_prompt: str, item_model: Type[T], model: Optional[str] = None, max_retries: int = 3) -> List[T]`**
-- Generate a list of structured outputs
-- `user_prompt`: The user's message/prompt
-- `item_model`: Pydantic model class for each item in the list
-- `model`: Optional model identifier (uses current_model if None)
-- Returns list of validated item_model instances
 
 ## Project Structure
 
