@@ -1,5 +1,7 @@
+import argparse
 import json
 import os
+import sys
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Type, TypeVar
 
@@ -10,6 +12,7 @@ from image_utils import ImageUtils
 
 T = TypeVar("T", bound=BaseModel)
 
+
 @dataclass
 class ModelInput:
     """Generic input for text generation or structured output.
@@ -18,29 +21,27 @@ class ModelInput:
     All fields are optional and only relevant fields for the operation should be set.
     """
     # Text/Vision generation fields
-    prompt: Optional[str] = None
-    messages: Optional[List[Dict]] = None
+    user_prompt: Optional[str] = None
+    system_prompt: Optional[str] = None
+
     image_source: Optional[str] = None
 
     # Structured generation fields
-    user_prompt: Optional[str] = None
     response_model: Optional[Type[T]] = None
 
     # Common fields
     model: Optional[str] = None
-    max_retries: int = 3
     extra_body: Optional[Dict] = None
+
 
 @dataclass
 class ModelConfig:
     """Configuration for model inference parameters."""
-    model: Optional[str] = None
     temperature: float = 0.7
     max_tokens: Optional[int] = None
     top_p: float = 1.0
     frequency_penalty: float = 0.0
     presence_penalty: float = 0.0
-    system_prompt: Optional[str] = None
     extra_body: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
@@ -73,31 +74,30 @@ class OpenRouterClient:
     """Manage OpenRouter API interactions with text and vision models."""
 
     TEXT_MODELS = {
-        "deepseek": "deepseek/deepseek-chat-v3.1:free",
-        "mistral": "mistralai/mistral-small-3.2-24b-instruct:free",
-        "kimi": "moonshotai/kimi-dev-72b:free",
-        "llama": "meta-llama/llama-3.3-8b-instruct:free",
-        "nemotron": "nvidia/nemotron-nano-9b-v2:free",
+        "deepseek": "tngtech/deepseek-r1t2-chimera:free",
+        "gemma3n" : "google/gemma-3n-e4b-it:free",
+        "glm": "z-ai/glm-4.5-air:free",
         "gpt-oss": "openai/gpt-oss-20b:free",
-        "qwen-14b": "qwen/qwen3-14b:free",
-        "qwen-30b": "qwen/qwen3-30b-a3b:free",
-        "qwen-235b": "qwen/qwen3-235b-a22b:free",
-        "hunyuan": "tencent/hunyuan-a13b-instruct:free",
-        "grok": "x-ai/grok-4-fast:free",
-        "glm": "z-ai/glm-4.5-air:free"
+        "grok": "x-ai/grok-4.1-fast:free",
+        "llama": "meta-llama/llama-3.3-70b-instruct:free",
+        "mistral": "mistralai/mistral-small-3.1-24b-instruct:free",
+        "nemotron": "nvidia/nemotron-nano-12b-v2-vl:free",
+        "qwen-235b": "qwen/qwen3-235b-a22b:free"
     }
 
     VISION_MODELS = {
-        "llama4": "meta-llama/llama-4-maverick:free",
         "gemma27b": "google/gemma-3-27b-it:free",
-        "mistral": "mistralai/mistral-small-3.2-24b-instruct:free",
         "haiku": "anthropic/claude-haiku-4.5",
+        "mistral": "mistralai/mistral-small-3.2-24b-instruct:free",
+    }
+
+    NONFREE_MODELS = {
         "sonnet": "anthropic/claude-sonnet-4.5",
         "sonar": "perplexity/sonar",
         "sonar-pro": "perplexity/sonar-pro",
         "sonar-research": "perplexity/sonar-deep-research",
         "sonar-search": "perplexity/sonar-pro-search",
-        "sonar-reason": "perplexity/sonar-reasoning-pro",
+        "sonar-reason": "perplexity/sonar-reasoning-pro"
     }
 
     ALL_MODELS = list(TEXT_MODELS.values()) + list(VISION_MODELS.values())
@@ -119,123 +119,116 @@ class OpenRouterClient:
             base_url="https://openrouter.ai/api/v1", api_key=self.api_key
         )
 
-        self.current_model = self.VISION_MODELS["sonnet"]
         self.default_config = config or ModelConfig()
+
+    def _resolve_model(self, model: Optional[str]) -> Optional[str]:
+        """Resolve model alias to full model ID.
+
+        Args:
+            model: Model alias or full model ID
+
+        Returns:
+            Full model ID or None if not provided
+        """
+        if not model:
+            return None
+        # Check if it's an alias
+        if model in self.TEXT_MODELS:
+            return self.TEXT_MODELS[model]
+        if model in self.VISION_MODELS:
+            return self.VISION_MODELS[model]
+        # Return as-is if it's already a full model ID
+        return model
 
     @staticmethod
     def payload_message(
-        prompt: Optional[str] = None,
-        messages: Optional[List[Dict]] = None,
+        user_prompt: str,
         image_source: Optional[str] = None,
+        system_prompt: Optional[str] = None,
     ) -> List[Dict]:
         """Create message payload for LLM API call.
 
         Args:
-            prompt: Simple text prompt (creates user message)
-            messages: Existing list of message dictionaries with 'role' and 'content'
-            image_source: URL, base64-encoded image, or local file path (requires prompt)
+            prompt: Text prompt (required)
+            image_source: Optional URL, base64-encoded image, or local file path
+            system_prompt: Optional system message to set context
 
         Returns:
             List of message dictionaries formatted for API
-
-        Raises:
-            ValueError: If neither prompt nor messages provided
         """
+        messages = []
+
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+
+        # Create content array
+        content = [{"type": "text", "text": user_prompt}]
+
         if image_source:
             image_url = image_source
             if not image_source.startswith(("http://", "https://", "data:")):
                 image_url = ImageUtils.encode_to_base64(image_source)
+            content.append({"type": "image_url", "image_url": {"url": image_url}})
 
-            return [{
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt},
-                    {"type": "image_url", "image_url": {"url": image_url}}
-                ]
-            }]
-        elif prompt:
-            return [{"role": "user", "content": prompt}]
-        elif messages:
-            return messages
-        else:
-            raise ValueError("Either prompt, messages, or image_source must be provided")
+        messages.append({"role": "user", "content": content})
+        return messages
 
     def generate_text(
         self,
-        prompt: Optional[str] = None,
-        messages: Optional[List[Dict]] = None,
-        image_source: Optional[str] = None,
-        model: Optional[str] = None,
-        extra_body: Optional[Dict] = None,
+        input_data: ModelInput,
         **kwargs,
     ) -> str:
         """Send a chat completion request with flexible input types.
 
         Args:
-            prompt: Simple text prompt (creates user message)
-            messages: List of message dictionaries with 'role' and 'content'
-            image_source: URL, base64-encoded image, or local file path (requires prompt)
-            model: Optional model identifier or alias (overrides current_model)
-            extra_body: Optional extra parameters for the request
+            input_data: ModelInput instance with prompt and optional image_source
             **kwargs: Additional arguments to pass to the API
 
         Returns:
             The response content as a string
 
         Raises:
-            ValueError: If neither prompt nor messages provided
+            ValueError: If prompt is not provided in input_data
         """
-        payload = self.payload_message(prompt, messages, image_source)
+        if not input_data.user_prompt:
+            raise ValueError("'prompt' must be provided in ModelInput.")
 
-        use_model = model if model else self.current_model
-        if use_model in self.TEXT_MODELS:
-            use_model = self.TEXT_MODELS[use_model]
-        elif use_model in self.VISION_MODELS:
-            use_model = self.VISION_MODELS[use_model]
+        messages = self.payload_message(input_data.user_prompt, 
+                                        input_data.image_source, 
+                                        input_data.system_prompt)
 
         completion = self.client.chat.completions.create(
-            model=use_model, messages=payload, extra_body=extra_body or {}, **kwargs
+            model=input_data.model,
+            messages=messages,
+            extra_body=input_data.extra_body or {},
+            **kwargs
         )
+
         return completion.choices[0].message.content
-
-    def get_current_model(self) -> str:
-        """Get the currently selected model."""
-        return self.current_model
-
-    def get_model_info(self) -> Dict[str, Any]:
-        """Get information about the current model."""
-        return {
-            "model": self.current_model,
-        }
 
     def generate_structured(
         self,
-        user_prompt: str,
-        response_model: Type[T],
-        model: Optional[str] = None,
-        max_retries: int = 3,
-    ) -> T:
+        input_data: ModelInput,
+    ) -> BaseModel:
         """Generate structured output using a Pydantic model schema.
 
         Args:
-            user_prompt: The user's message/prompt
-            response_model: Pydantic model class defining the expected structure
-            model: Optional model identifier (uses current_model if None)
-            max_retries: Maximum number of retry attempts for validation failures
+            input_data: ModelInput instance with user_prompt and response_model
 
         Returns:
             Instance of response_model populated with the validated API response
 
         Raises:
-            ValidationError: If the response cannot be validated after max_retries
+            ValueError: If response_model is not provided in input_data
+            RuntimeError: If the response cannot be validated
         """
-        use_model = model if model else self.current_model
-        if use_model in self.TEXT_MODELS:
-            use_model = self.TEXT_MODELS[use_model]
-        elif use_model in self.VISION_MODELS:
-            use_model = self.VISION_MODELS[use_model]
+        if not input_data.response_model:
+            raise ValueError("response_model must be provided in ModelInput.")
 
-        schema = response_model.model_json_schema()
+        if not input_data.user_prompt:
+            raise ValueError("user_prompt must be provided in ModelInput.")
+
+        schema = input_data.response_model.model_json_schema()
         schema_instruction = (
             f"You must respond with valid JSON that matches this exact schema:\n"
             f"{json.dumps(schema, indent=2)}\n\n"
@@ -243,42 +236,21 @@ class OpenRouterClient:
         )
 
         config = self.default_config
-        base_system_prompt = config.system_prompt or ""
-        enhanced_system_prompt = f"{base_system_prompt}\n\n{schema_instruction}".strip()
-        messages = [
-            {"role": "system", "content": enhanced_system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-
-        last_error = None
-        response_text = None
-
-        for attempt in range(max_retries):
-            try:
-                api_params = config.to_api_params()
-                completion = self.client.chat.completions.create(
-                    model=use_model, messages=messages, **api_params
-                )
-                response_text = completion.choices[0].message.content
-                json_text = self._extract_json(response_text)
-                parsed_data = json.loads(json_text)
-                return response_model.model_validate(parsed_data)
-            except (json.JSONDecodeError, ValidationError) as e:
-                last_error = e
-                if attempt < max_retries - 1:
-                    error_msg = (
-                        f"Your previous response was invalid. Error: {str(e)}\n"
-                        f"Please provide a valid JSON response matching the schema exactly."
-                    )
-                    messages.append({"role": "assistant", "content": response_text})
-                    messages.append({"role": "user", "content": error_msg})
-            except Exception as e:
-                raise RuntimeError(f"API request failed: {str(e)}")
-
-        raise ValidationError(
-            f"Failed to generate valid structured output after {max_retries} attempts. "
-            f"Last error: {str(last_error)}"
-        )
+        enhanced_system_prompt = schema_instruction.strip()
+        messages = self.payload_message(input_data.user_prompt, 
+                                        input_data.image_source, 
+                                        enhanced_system_prompt)
+        try:
+            api_params = config.to_api_params()
+            completion = self.client.chat.completions.create(
+                model=input_data.model, messages=messages, **api_params
+            )
+            response_text = completion.choices[0].message.content
+            json_text = self._extract_json(response_text)
+            parsed_data = json.loads(json_text)
+            return input_data.response_model.model_validate(parsed_data)
+        except Exception as e:
+            raise RuntimeError(f"Failed to generate structured output: {str(e)}")
 
     @staticmethod
     def _extract_json(text: str) -> str:
@@ -293,36 +265,42 @@ class OpenRouterClient:
         return text
 
 
-# Example usage
+def main():
+    """Main CLI entry point."""
+    parser = argparse.ArgumentParser(
+        description="OpenRouter CLI - Interact with various LLM models",
+    )
+    parser.add_argument(
+        "-p", "--prompt",
+        required=True,
+        help="Prompt text"
+    )
+    parser.add_argument(
+        "-m", "--model",
+        default="haiku",
+        help="Model to use (default: haiku)"
+    )
+    parser.add_argument(
+        "-i", "--image",
+        default = None,
+        help="Image source: URL, base64 data, or local file path"
+    )
+
+    args = parser.parse_args()
+
+    try:
+        client = OpenRouterClient()
+        input_data = ModelInput(
+            prompt=args.prompt,
+            image_source=args.image,
+            model=args.model
+        )
+        response = client.generate_text(input_data)
+        print(response)
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
 if __name__ == "__main__":
-    client = OpenRouterClient()
-
-    # Simple text prompt
-    response = client.generate_text("What is the meaning of life?")
-    print(f"Response: {response[:100]}...")
-
-    # Switch model using alias
-    client.set_model("llama")
-    print(f"\nSwitched to: {client.get_current_model()} ({client.get_model_type()})")
-
-    # Vision with URL
-    # response = client.generate_text(
-    #     prompt="What do you see in this image?",
-    #     image_source="https://example.com/image.jpg",
-    #     model="sonnet"
-    # )
-
-    # Vision with local image file
-    # response = client.generate_text(
-    #     prompt="What's in this image?",
-    #     image_source="path/to/local/image.jpg",
-    #     model="llama4"
-    # )
-    # print(f"Response: {response}")
-
-    # With full messages list
-    # messages = [
-    #     {"role": "system", "content": "You are a helpful assistant."},
-    #     {"role": "user", "content": "Hello!"}
-    # ]
-    # response = client.generate_text(messages=messages)
+    main()

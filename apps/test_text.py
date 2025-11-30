@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test script for text generation with OpenRouterClient."""
 
-from openrouter_client import OpenRouterClient, ModelConfig
+from openrouter_client import OpenRouterClient, ModelConfig, ModelInput
 
 def test_basic_text():
     """Test basic text generation with a simple prompt."""
@@ -11,10 +11,8 @@ def test_basic_text():
 
     try:
         client = OpenRouterClient()
-        print(f"Current model: {client.get_current_model()}")
-        print(f"Model info: {client.get_model_info()}")
-
-        response = client.generate_text("What is 2+2?")
+        input_data = ModelInput(prompt="What is 2+2?")
+        response = client.generate_text(input_data)
         print(f"\nPrompt: What is 2+2?")
         print(f"Response: {response}\n")
         return True
@@ -30,10 +28,11 @@ def test_with_model_alias():
 
     try:
         client = OpenRouterClient()
-        response = client.generate_text(
+        input_data = ModelInput(
             prompt="Explain quantum computing in one sentence.",
             model="haiku"
         )
+        response = client.generate_text(input_data)
         print(f"Model used: haiku")
         print(f"Response: {response}\n")
         return True
@@ -41,19 +40,19 @@ def test_with_model_alias():
         print(f"ERROR: {e}\n")
         return False
 
-def test_with_messages():
-    """Test text generation with message list."""
+def test_with_system_prompt():
+    """Test text generation with system prompt."""
     print("=" * 60)
-    print("TEST 3: Text Generation with Messages")
+    print("TEST 3: Text Generation with System Prompt")
     print("=" * 60)
 
     try:
         client = OpenRouterClient()
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "What is Python?"}
-        ]
-        response = client.generate_text(messages=messages)
+        input_data = ModelInput(
+            prompt="What is Python?",
+            system_prompt="You are a helpful assistant."
+        )
+        response = client.generate_text(input_data)
         print(f"Response: {response}\n")
         return True
     except Exception as e:
@@ -69,11 +68,11 @@ def test_with_config():
     try:
         config = ModelConfig(
             temperature=0.5,
-            max_tokens=100,
-            system_prompt="You are a concise assistant."
+            max_tokens=100
         )
         client = OpenRouterClient(config=config)
-        response = client.generate_text("Tell me about AI.")
+        input_data = ModelInput(prompt="Tell me about AI.")
+        response = client.generate_text(input_data)
         print(f"Temperature: 0.5, Max tokens: 100")
         print(f"Response: {response}\n")
         return True
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     results = []
     results.append(("Basic Text", test_basic_text()))
     results.append(("Model Alias", test_with_model_alias()))
-    results.append(("Messages", test_with_messages()))
+    results.append(("System Prompt", test_with_system_prompt()))
     results.append(("Custom Config", test_with_config()))
 
     print("\n" + "=" * 60)

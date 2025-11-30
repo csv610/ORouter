@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test script for vision capabilities with OpenRouterClient."""
 
-from openrouter_client import OpenRouterClient
+from openrouter_client import OpenRouterClient, ModelInput
 
 def test_vision_with_url():
     """Test vision with a public image URL."""
@@ -12,11 +12,12 @@ def test_vision_with_url():
     try:
         client = OpenRouterClient()
         # Using a simple public image
-        response = client.generate_text(
+        input_data = ModelInput(
             prompt="Describe what you see in this image in 2 sentences.",
             image_source="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/1200px-Good_Food_Display_-_NCI_Visuals_Online.jpg",
             model="sonnet"
         )
+        response = client.generate_text(input_data)
         print(f"Image URL: https://upload.wikimedia.org/...")
         print(f"Model: sonnet (Claude Sonnet 4.5)")
         print(f"Response: {response}\n")
@@ -36,11 +37,12 @@ def test_vision_with_data_uri():
         red_pixel_data_uri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
 
         client = OpenRouterClient()
-        response = client.generate_text(
+        input_data = ModelInput(
             prompt="What color is this image?",
             image_source=red_pixel_data_uri,
             model="haiku"
         )
+        response = client.generate_text(input_data)
         print(f"Image: 1x1 pixel data URI")
         print(f"Model: haiku (Claude Haiku 4.5)")
         print(f"Response: {response}\n")
@@ -68,11 +70,12 @@ def test_vision_with_local_file():
             img.save(tmp_path)
 
         client = OpenRouterClient()
-        response = client.generate_text(
+        input_data = ModelInput(
             prompt="What color is this image? Be concise.",
             image_source=tmp_path,
             model="haiku"
         )
+        response = client.generate_text(input_data)
         print(f"Image: Local file (100x100 blue square)")
         print(f"Model: haiku (Claude Haiku 4.5)")
         print(f"Response: {response}\n")
@@ -85,31 +88,23 @@ def test_vision_with_local_file():
         print(f"ERROR: {e}\n")
         return False
 
-def test_vision_with_messages():
-    """Test vision with message list including image."""
+def test_vision_with_system_prompt():
+    """Test vision with system prompt and image."""
     print("=" * 60)
-    print("TEST 4: Vision with Message List")
+    print("TEST 4: Vision with System Prompt")
     print("=" * 60)
 
     try:
         client = OpenRouterClient()
         image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/1200px-Good_Food_Display_-_NCI_Visuals_Online.jpg"
 
-        messages = [
-            {
-                "role": "system",
-                "content": "You are a food expert. Analyze images and describe the nutritional content."
-            },
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": "What types of food are shown here?"},
-                    {"type": "image_url", "image_url": {"url": image_url}}
-                ]
-            }
-        ]
-
-        response = client.generate_text(messages=messages, model="sonnet")
+        input_data = ModelInput(
+            prompt="What types of food are shown here?",
+            image_source=image_url,
+            system_prompt="You are a food expert. Analyze images and describe the nutritional content.",
+            model="sonnet"
+        )
+        response = client.generate_text(input_data)
         print(f"Model: sonnet (Claude Sonnet 4.5)")
         print(f"Response: {response}\n")
         return True
@@ -130,11 +125,12 @@ def test_vision_model_variants():
         for model_alias in models_to_test:
             try:
                 client = OpenRouterClient()
-                response = client.generate_text(
+                input_data = ModelInput(
                     prompt="Briefly describe this image.",
                     image_source=image_url,
                     model=model_alias
                 )
+                response = client.generate_text(input_data)
                 print(f"✓ {model_alias}: Success (response length: {len(response)} chars)")
             except Exception as e:
                 print(f"✗ {model_alias}: {str(e)[:80]}")
@@ -154,7 +150,7 @@ if __name__ == "__main__":
     results.append(("Vision with URL", test_vision_with_url()))
     results.append(("Vision with Data URI", test_vision_with_data_uri()))
     results.append(("Vision with Local File", test_vision_with_local_file()))
-    results.append(("Vision with Messages", test_vision_with_messages()))
+    results.append(("Vision with System Prompt", test_vision_with_system_prompt()))
     results.append(("Vision Model Variants", test_vision_model_variants()))
 
     print("\n" + "=" * 60)

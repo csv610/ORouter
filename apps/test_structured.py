@@ -3,7 +3,7 @@
 
 from typing import List, Optional
 from pydantic import BaseModel
-from openrouter_client import OpenRouterClient
+from openrouter_client import OpenRouterClient, ModelInput
 
 # Define Pydantic models for structured output
 class Person(BaseModel):
@@ -60,11 +60,12 @@ def test_simple_structured():
         client = OpenRouterClient()
         prompt = "Create a person named Alice who is a 28-year-old software engineer. Include her email as alice.smith@company.com"
 
-        result = client.generate_structured(
+        input_data = ModelInput(
             user_prompt=prompt,
             response_model=Person,
             model="sonnet"
         )
+        result = client.generate_structured(input_data)
 
         print(f"Prompt: {prompt}")
         print(f"\nStructured Output:")
@@ -94,11 +95,12 @@ def test_complex_structured():
         client = OpenRouterClient()
         prompt = "Provide a recipe for chocolate chip cookies"
 
-        result = client.generate_structured(
+        input_data = ModelInput(
             user_prompt=prompt,
             response_model=Recipe,
             model="sonnet"
         )
+        result = client.generate_structured(input_data)
 
         print(f"Prompt: {prompt}")
         print(f"\nStructured Output:")
@@ -135,11 +137,12 @@ def test_nested_structured():
         client = OpenRouterClient()
         prompt = "Review the movie 'The Matrix' from 1999. Rate it and provide analysis."
 
-        result = client.generate_structured(
+        input_data = ModelInput(
             user_prompt=prompt,
             response_model=MovieReview,
             model="sonnet"
         )
+        result = client.generate_structured(input_data)
 
         print(f"Prompt: {prompt}")
         print(f"\nStructured Output:")
@@ -178,11 +181,12 @@ def test_list_structured():
         class PeopleList(BaseModel):
             items: List[Person]
 
-        result = client.generate_structured(
+        input_data = ModelInput(
             user_prompt=prompt,
             response_model=PeopleList,
             model="sonnet"
         )
+        result = client.generate_structured(input_data)
         results = result.items
 
         print(f"Prompt: {prompt}")
@@ -213,11 +217,12 @@ def test_sentiment_analysis():
         text = "I absolutely love this product! It's amazing, high quality, and works perfectly. Highly recommend!"
         prompt = f"Analyze the sentiment of this text: '{text}'"
 
-        result = client.generate_structured(
+        input_data = ModelInput(
             user_prompt=prompt,
             response_model=SentimentAnalysis,
             model="haiku"
         )
+        result = client.generate_structured(input_data)
 
         print(f"Text: {text}")
         print(f"\nStructured Output:")
@@ -246,12 +251,12 @@ def test_retry_on_validation():
         client = OpenRouterClient()
         prompt = "Create a person. Name should be 'Bob', age 30, and occupation 'Consultant'."
 
-        result = client.generate_structured(
+        input_data = ModelInput(
             user_prompt=prompt,
             response_model=Person,
-            model="sonnet",
-            max_retries=3
+            model="sonnet"
         )
+        result = client.generate_structured(input_data)
 
         print(f"Prompt: {prompt}")
         print(f"\nStructured Output (with retries allowed):")
