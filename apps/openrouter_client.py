@@ -122,6 +122,44 @@ class OpenRouterClient:
         self.current_model = self.VISION_MODELS["sonnet"]
         self.default_config = config or ModelConfig()
 
+    @staticmethod
+    def payload_message(
+        prompt: Optional[str] = None,
+        messages: Optional[List[Dict]] = None,
+        image_source: Optional[str] = None,
+    ) -> List[Dict]:
+        """Create message payload for LLM API call.
+
+        Args:
+            prompt: Simple text prompt (creates user message)
+            messages: Existing list of message dictionaries with 'role' and 'content'
+            image_source: URL, base64-encoded image, or local file path (requires prompt)
+
+        Returns:
+            List of message dictionaries formatted for API
+
+        Raises:
+            ValueError: If neither prompt nor messages provided
+        """
+        if image_source:
+            image_url = image_source
+            if not image_source.startswith(("http://", "https://", "data:")):
+                image_url = ImageUtils.encode_to_base64(image_source)
+
+            return [{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {"type": "image_url", "image_url": {"url": image_url}}
+                ]
+            }]
+        elif prompt:
+            return [{"role": "user", "content": prompt}]
+        elif messages:
+            return messages
+        else:
+            raise ValueError("Either prompt, messages, or image_source must be provided")
+
     def generate_text(
         self,
         prompt: Optional[str] = None,
@@ -147,22 +185,7 @@ class OpenRouterClient:
         Raises:
             ValueError: If neither prompt nor messages provided
         """
-        if image_source:
-            image_url = image_source
-            if not image_source.startswith(("http://", "https://", "data:")):
-                image_url = ImageUtils.encode_to_base64(image_source)
-
-            messages = [{
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt},
-                    {"type": "image_url", "image_url": {"url": image_url}}
-                ]
-            }]
-        elif prompt:
-            messages = [{"role": "user", "content": prompt}]
-        elif not messages:
-            raise ValueError("Either prompt, messages, or image_source must be provided")
+        payload = self.payload_message(prompt, messages, image_source)
 
         use_model = model if model else self.current_model
         if use_model in self.TEXT_MODELS:
@@ -171,7 +194,7 @@ class OpenRouterClient:
             use_model = self.VISION_MODELS[use_model]
 
         completion = self.client.chat.completions.create(
-            model=use_model, messages=messages, extra_body=extra_body or {}, **kwargs
+            model=use_model, messages=payload, extra_body=extra_body or {}, **kwargs
         )
         return completion.choices[0].message.content
 
