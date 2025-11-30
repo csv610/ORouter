@@ -50,7 +50,7 @@ Get your free API key at [OpenRouter](https://openrouter.ai/)
 ### Using the Python Library
 
 ```python
-from apps.openrouter_client import OpenRouterClient, ModelConfig
+from apps.openrouter_client import OpenRouterClient, ModelConfig, ModelInput
 
 # Initialize the client
 client = OpenRouterClient()
@@ -114,6 +114,13 @@ config = ModelConfig(
     system_prompt="You are a helpful assistant"
 )
 client = OpenRouterClient(config=config)
+
+# Alternative: using ModelInput dataclass
+input_data = ModelInput(
+    prompt="What is machine learning?",
+    model="sonnet"
+)
+response = client.generate_text(input_data.prompt, model=input_data.model)
 ```
 
 ### Using the CLI

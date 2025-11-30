@@ -11,6 +11,27 @@ from image_utils import ImageUtils
 T = TypeVar("T", bound=BaseModel)
 
 @dataclass
+class ModelInput:
+    """Generic input for text generation or structured output.
+
+    Optional dataclass for users who prefer structured parameter passing.
+    All fields are optional and only relevant fields for the operation should be set.
+    """
+    # Text/Vision generation fields
+    prompt: Optional[str] = None
+    messages: Optional[List[Dict]] = None
+    image_source: Optional[str] = None
+
+    # Structured generation fields
+    user_prompt: Optional[str] = None
+    response_model: Optional[Type[T]] = None
+
+    # Common fields
+    model: Optional[str] = None
+    max_retries: int = 3
+    extra_body: Optional[Dict] = None
+
+@dataclass
 class ModelConfig:
     """Configuration for model inference parameters."""
     model: Optional[str] = None
