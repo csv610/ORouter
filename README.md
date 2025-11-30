@@ -4,19 +4,14 @@ A Python library for interacting with [OpenRouter](https://openrouter.ai/) - a f
 
 ## Features
 
-- **Multiple Free Models**: Access to 12+ free LLM models including:
-  - DeepSeek Chat v3.1
-  - Mistral Small 3.2
-  - Meta Llama 3.3
-  - Qwen 3
-  - Grok 4 Fast
-  - And more...
-
-- **Easy Integration**: Simple Python API for text and vision chat
-- **Model Switching**: Easily switch between different models
-- **Vision Support**: Ready for vision-capable models (coming soon)
-- **CLI Tools**: Command-line interfaces for quick queries
-- **Flexible Configuration**: Customize temperature, top-p, penalties, and more
+- **Text Generation**: Generate text with multiple LLM models via aliases or full model IDs
+- **Vision Support**: Process images from URLs, data URIs, or local file paths
+- **Structured Output**: Generate structured JSON/Pydantic models with automatic validation and retries
+- **Model Aliases**: Easy-to-use aliases for text and vision models (e.g., "haiku", "sonnet", "mistral")
+- **Multiple Models**: 12+ text models and 10+ vision models available through OpenRouter
+- **Flexible Configuration**: Customize temperature, top-p, penalties, max tokens, and system prompts
+- **Automatic Retries**: Built-in retry mechanism for structured output validation failures
+- **Base64 Image Conversion**: Automatically converts local image files to base64 for API submission
 
 ## Installation
 
@@ -55,27 +50,64 @@ Get your free API key at [OpenRouter](https://openrouter.ai/)
 ### Using the Python Library
 
 ```python
-from apps.openrouter_client import OpenRouterChat
+from apps.openrouter_client import OpenRouterClient, ModelConfig
 
 # Initialize the client
-chat = OpenRouterChat()
+client = OpenRouterClient()
 
-# Quick text chat
-response = chat.quick_chat("What is Python?")
+# Simple text generation
+response = client.generate_text("What is Python?")
 print(response)
 
-# Switch models
-chat.set_model("meta-llama/llama-3.3-8b-instruct:free")
+# Use a specific model alias
+response = client.generate_text(
+    prompt="Explain quantum computing",
+    model="sonnet"  # Uses Claude Sonnet 4.5
+)
 
-# List available models
-models = chat.list_models("text")
-for model in models:
-    print(model)
+# Vision - from URL
+response = client.generate_text(
+    prompt="What's in this image?",
+    image_source="https://example.com/image.jpg",
+    model="haiku"
+)
 
-# Get model information
-info = chat.get_model_info()
-print(f"Current model: {info['model']}")
-print(f"Type: {info['type']}")
+# Vision - from local file
+response = client.generate_text(
+    prompt="Describe this image",
+    image_source="/path/to/local/image.png",
+    model="sonnet"
+)
+
+# Structured output with Pydantic
+from pydantic import BaseModel
+
+class Person(BaseModel):
+    name: str
+    age: int
+    occupation: str
+
+person = client.generate_structured(
+    user_prompt="Create a person named Alice, age 28, software engineer",
+    response_model=Person,
+    model="sonnet"
+)
+print(f"{person.name} is {person.age} and works as a {person.occupation}")
+
+# List of structured outputs
+people = client.generate_structured_list(
+    user_prompt="Create 3 people",
+    item_model=Person,
+    model="sonnet"
+)
+
+# Custom configuration
+config = ModelConfig(
+    temperature=0.5,
+    max_tokens=200,
+    system_prompt="You are a helpful assistant"
+)
+client = OpenRouterClient(config=config)
 ```
 
 ### Using the CLI
@@ -101,82 +133,98 @@ python apps/cli_text_client.py \
 
 ## Available Models
 
-### Text Models (Free)
-- `deepseek/deepseek-chat-v3.1:free`
-- `mistralai/mistral-small-3.2-24b-instruct:free`
-- `moonshotai/kimi-dev-72b:free`
-- `meta-llama/llama-3.3-8b-instruct:free`
-- `nvidia/nemotron-nano-9b-v2:free`
-- `openai/gpt-oss-20b:free`
-- `qwen/qwen3-14b:free`
-- `qwen/qwen3-30b-a3b:free`
-- `qwen/qwen3-235b-a22b:free`
-- `tencent/hunyuan-a13b-instruct:free`
-- `x-ai/grok-4-fast:free`
-- `z-ai/glm-4.5-air:free`
+### Text Models
+
+Use aliases for convenience or full model IDs:
+
+| Alias | Full Model ID |
+|-------|---------------|
+| deepseek | `deepseek/deepseek-chat-v3.1:free` |
+| mistral | `mistralai/mistral-small-3.2-24b-instruct:free` |
+| kimi | `moonshotai/kimi-dev-72b:free` |
+| llama | `meta-llama/llama-3.3-8b-instruct:free` |
+| nemotron | `nvidia/nemotron-nano-9b-v2:free` |
+| gpt-oss | `openai/gpt-oss-20b:free` |
+| qwen-14b | `qwen/qwen3-14b:free` |
+| qwen-30b | `qwen/qwen3-30b-a3b:free` |
+| qwen-235b | `qwen/qwen3-235b-a22b:free` |
+| hunyuan | `tencent/hunyuan-a13b-instruct:free` |
+| grok | `x-ai/grok-4-fast:free` |
+| glm | `z-ai/glm-4.5-air:free` |
 
 ### Vision Models
-Vision model support is coming soon!
+
+| Alias | Full Model ID |
+|-------|---------------|
+| llama4 | `meta-llama/llama-4-maverick:free` |
+| gemma27b | `google/gemma-3-27b-it:free` |
+| mistral | `mistralai/mistral-small-3.2-24b-instruct:free` |
+| haiku | `anthropic/claude-haiku-4.5` |
+| sonnet | `anthropic/claude-sonnet-4.5` |
+| sonar | `perplexity/sonar` |
+| sonar-pro | `perplexity/sonar-pro` |
+| sonar-research | `perplexity/sonar-deep-research` |
+| sonar-search | `perplexity/sonar-pro-search` |
+| sonar-reason | `perplexity/sonar-reasoning-pro` |
 
 ## API Documentation
 
-### OpenRouterChat Class
+### OpenRouterClient Class
 
 #### Methods
 
-**`__init__(api_key: Optional[str] = None)`**
+**`__init__(api_key: Optional[str] = None, config: Optional[ModelConfig] = None)`**
 - Initialize the OpenRouter client
 - If `api_key` is None, reads from `OPENROUTER_API_KEY` environment variable
+- `config`: Optional ModelConfig for default inference parameters
 
-**`list_models(model_type: str = "all") -> List[str]`**
-- Returns list of available models
-- `model_type`: "all", "text", or "vision"
-
-**`set_model(model: str) -> None`**
-- Set the current model to use
-- Raises `ValueError` if model not found
+**`generate_text(prompt: Optional[str] = None, messages: Optional[List[Dict]] = None, image_source: Optional[str] = None, model: Optional[str] = None, extra_body: Optional[Dict] = None, **kwargs) -> str`**
+- Send a chat completion request with flexible input types
+- `prompt`: Simple text prompt (creates user message)
+- `messages`: List of message dictionaries with 'role' and 'content'
+- `image_source`: URL, base64-encoded image, or local file path
+- `model`: Optional model identifier or alias (overrides current_model)
+- Returns response content as string
 
 **`get_current_model() -> str`**
-- Returns currently selected model identifier
+- Returns the currently selected model
 
-**`generate_text(messages: List[Dict], model: Optional[str] = None, **kwargs) -> str`**
-- Send a chat completion request
-- `messages`: List of message dicts with 'role' and 'content'
-- Returns response as string
+**`get_model_info() -> Dict[str, Any]`**
+- Returns information about the current model
 
-**`quick_chat(prompt: str, model: Optional[str] = None) -> str`**
-- Quick method for single text prompts
-- Returns response as string
+**`generate_structured(user_prompt: str, response_model: Type[T], model: Optional[str] = None, max_retries: int = 3) -> T`**
+- Generate structured output using a Pydantic model schema
+- `user_prompt`: The user's message/prompt
+- `response_model`: Pydantic model class defining the expected structure
+- `model`: Optional model identifier (uses current_model if None)
+- `max_retries`: Maximum number of retry attempts for validation failures
+- Returns instance of response_model populated with validated API response
 
-**`vision_chat(prompt: str, image_url: str, model: Optional[str] = None) -> str`**
-- Support for vision-capable models with image inputs
-- `image_url`: URL or base64-encoded image
-- Raises `ValueError` if model doesn't support vision
-
-**`get_model_info() -> Dict[str, any]`**
-- Returns information about current model
-
-**`is_vision_model(model: str) -> bool`**
-- Check if a model supports vision/image inputs
+**`generate_structured_list(user_prompt: str, item_model: Type[T], model: Optional[str] = None, max_retries: int = 3) -> List[T]`**
+- Generate a list of structured outputs
+- `user_prompt`: The user's message/prompt
+- `item_model`: Pydantic model class for each item in the list
+- `model`: Optional model identifier (uses current_model if None)
+- Returns list of validated item_model instances
 
 ## Project Structure
 
 ```
-ORouter/
+OpenRouter/
 ├── apps/
-│   ├── openrouter_client.py        # Main client library
+│   ├── openrouter_client.py        # Main client library (OpenRouterClient)
+│   ├── image_utils.py              # Image processing utilities
 │   ├── cli_text_client.py          # CLI for text queries
+│   ├── cli_query.py                # Query utility
 │   ├── cli_compare_text_clients.py # Model comparison tool
 │   ├── cli_medtopic.py             # Medical topic assistant
-│   ├── text_chat.py                # Text chat interface
-│   ├── vision_chat.py              # Vision chat interface
-│   ├── openrouter_text_client.py   # Alternative text client
+│   ├── test_text.py                # Text generation tests
+│   ├── test_vision.py              # Vision capability tests
+│   ├── test_structured.py          # Structured output tests
 │   └── medical_reports/            # Sample medical data
-├── openrouter/                     # Package module (extensible)
 ├── requirements.txt                # Python dependencies
-├── pyproject.toml                  # Package configuration
-├── LICENSE                         # MIT License
-└── README.md                       # This file
+├── README.md                       # This file
+└── LICENSE                         # License file
 ```
 
 ## Configuration
@@ -220,20 +268,66 @@ For issues and questions:
 - Open an issue on GitHub
 - Review existing issues and discussions
 
+## Testing
+
+The project includes comprehensive test suites for all major features:
+
+### Text Generation Tests (`test_text.py`)
+- Basic text generation
+- Model alias selection
+- Message list input
+- Custom configuration (temperature, max_tokens, system prompts)
+
+**Result: 4/4 tests passed ✓**
+
+### Vision Tests (`test_vision.py`)
+- Vision with public image URLs
+- Vision with data URIs (base64)
+- Vision with local file paths
+- Structured messages with vision content
+- Multiple vision model variants (Claude Haiku, Claude Sonnet)
+
+**Result: 5/5 tests passed ✓**
+
+### Structured Output Tests (`test_structured.py`)
+- Simple Pydantic model generation
+- Complex nested structures (recipes, reviews)
+- List of structured outputs
+- Sentiment analysis
+- Auto-retry on validation failure
+
+**Result: 6/6 tests passed ✓**
+
+Run all tests:
+```bash
+python test_text.py
+python test_vision.py
+python test_structured.py
+```
+
 ## Changelog
+
+### v1.0.0 (Current Release)
+- Refactored OpenRouterClient with modern API
+- Full text generation support with flexible inputs
+- Complete vision model support (URLs, data URIs, local files)
+- Structured output generation with Pydantic validation
+- Automatic retry mechanism for validation failures
+- Model alias system for easy model selection
+- Comprehensive test coverage (15+ tests)
+- Updated documentation and examples
 
 ### v0.1.0 (Initial Release)
 - Initial implementation of OpenRouterChat class
 - Basic text chat support
 - Multiple model support
 - CLI tools for querying models
-- Vision chat framework (ready for vision models)
 
 ## Roadmap
 
-- [ ] Vision model support integration
 - [ ] Streaming response support
 - [ ] Response caching
 - [ ] Cost tracking and monitoring
 - [ ] Batch processing support
 - [ ] Conversation history management
+- [ ] Multi-turn conversation helpers
