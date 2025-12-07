@@ -50,7 +50,7 @@ Get your free API key at [OpenRouter](https://openrouter.ai/)
 ### Using the Python Library
 
 ```python
-from apps.openrouter_client import OpenRouterClient, ModelConfig, ModelInput
+from orouter import OpenRouterClient, ModelConfig, ModelInput
 
 # Initialize the client
 client = OpenRouterClient()
@@ -125,23 +125,19 @@ response = client.generate_text(input_data.prompt, model=input_data.model)
 
 ### Using the CLI
 
-List available models:
+**Text Query CLI:**
 ```bash
-python apps/cli_text_client.py -l
+python apps/text_query_cli.py "What is artificial intelligence?"
 ```
 
-Query a model:
+**Vision Query CLI:**
 ```bash
-python apps/cli_text_client.py -q "What is artificial intelligence?" -v
+python apps/vision_query_cli.py "What's in this image?" --image "path/to/image.jpg"
 ```
 
-With specific model and settings:
+**Medical Topic Assistant:**
 ```bash
-python apps/cli_text_client.py \
-  -q "Explain quantum computing" \
-  -m "meta-llama/llama-3.3-8b-instruct:free" \
-  -t 0.7 \
-  --max-tokens 500
+python apps/medtopic_cli.py --topic "diabetes" --model "sonnet"
 ```
 
 ## Available Models
@@ -217,18 +213,21 @@ Use aliases for convenience or full model IDs:
 ## Project Structure
 
 ```
-OpenRouter/
-├── apps/
+ORouter/
+├── orouter/
+│   ├── __init__.py                 # Package exports
 │   ├── openrouter_client.py        # Main client library (OpenRouterClient)
-│   ├── image_utils.py              # Image processing utilities
-│   ├── cli_text_client.py          # CLI for text queries
-│   ├── cli_query.py                # Query utility
-│   ├── cli_compare_text_clients.py # Model comparison tool
-│   ├── cli_medtopic.py             # Medical topic assistant
-│   ├── test_text.py                # Text generation tests
-│   ├── test_vision.py              # Vision capability tests
-│   ├── test_structured.py          # Structured output tests
-│   └── medical_reports/            # Sample medical data
+│   ├── config.py                   # ModelConfig dataclass
+│   └── image_utils.py              # Image processing utilities
+├── apps/
+│   ├── text_query_cli.py           # CLI for text queries
+│   ├── vision_query_cli.py         # CLI for vision queries
+│   ├── medtopic_cli.py             # Medical topic assistant
+│   ├── compare_text_models_cly.py  # Model comparison tool
+│   └── CLAUDE.md                   # Claude-specific instructions
+├── docs/
+│   ├── CODE_OF_CONDUCT.md          # Community guidelines
+│   └── CONTRIBUTING.md             # Contribution guidelines
 ├── requirements.txt                # Python dependencies
 ├── README.md                       # This file
 └── LICENSE                         # License file
@@ -236,19 +235,23 @@ OpenRouter/
 
 ## Configuration
 
-### CLI Arguments
+### ModelConfig
 
-The CLI tool supports the following arguments:
-- `-q, --question`: Query text (default: "Hello, who are you?")
-- `-m, --model`: Specific model to use
-- `-s, --system`: System prompt
-- `-t, --temp`: Temperature (0.0-2.0, default: 1.0)
-- `--top-p`: Top-p sampling (default: 1.0)
-- `--frequency-penalty`: Frequency penalty (default: 0.0)
-- `--presence-penalty`: Presence penalty (default: 0.0)
-- `--max-tokens`: Maximum response tokens
-- `-l, --list-models`: List all available models
-- `-v, --verbose`: Print verbose output
+Customize default inference parameters when initializing the client:
+
+```python
+from orouter import OpenRouterClient, ModelConfig
+
+config = ModelConfig(
+    temperature=0.7,           # Controls randomness (0.0-2.0)
+    top_p=0.9,                # Top-p sampling
+    frequency_penalty=0.0,     # Frequency penalty
+    presence_penalty=0.0,      # Presence penalty
+    max_tokens=1000           # Maximum response length
+)
+
+client = OpenRouterClient(config=config)
+```
 
 ## Contributing
 
@@ -275,41 +278,21 @@ For issues and questions:
 - Open an issue on GitHub
 - Review existing issues and discussions
 
-## Testing
+## Usage Examples
 
-The project includes comprehensive test suites for all major features:
-
-### Text Generation Tests (`test_text.py`)
-- Basic text generation
-- Model alias selection
-- Message list input
-- Custom configuration (temperature, max_tokens, system prompts)
-
-**Result: 4/4 tests passed ✓**
-
-### Vision Tests (`test_vision.py`)
-- Vision with public image URLs
-- Vision with data URIs (base64)
-- Vision with local file paths
-- Structured messages with vision content
-- Multiple vision model variants (Claude Haiku, Claude Sonnet)
-
-**Result: 5/5 tests passed ✓**
-
-### Structured Output Tests (`test_structured.py`)
-- Simple Pydantic model generation
-- Complex nested structures (recipes, reviews)
-- List of structured outputs
-- Sentiment analysis
-- Auto-retry on validation failure
-
-**Result: 6/6 tests passed ✓**
-
-Run all tests:
+### Text Generation
 ```bash
-python test_text.py
-python test_vision.py
-python test_structured.py
+python apps/text_query_cli.py "Explain machine learning in simple terms"
+```
+
+### Vision Analysis
+```bash
+python apps/vision_query_cli.py "Describe this image" --image "https://example.com/image.jpg"
+```
+
+### Medical Topic Assistant
+```bash
+python apps/medtopic_cli.py --topic "hypertension" --detail
 ```
 
 ## Changelog
