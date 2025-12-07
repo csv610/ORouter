@@ -127,15 +127,15 @@ Provide comprehensive, evidence-based medical information covering:
         print(f"  Querying {model}...", file=sys.stderr)
         
         try:
-            client = OpenRouterClient(config=ModelConfig(temperature=0.3))
-            # Resolve model alias if needed
-            resolved_model = client._resolve_model(model)
-            response = client.generate_structured(
+            client = OpenRouterClient()
+            # Create config with the model specified
+            config = ModelConfig(model=model, temperature=0.3)
+            response = client.generate_content(
                 ModelInput(
                     user_prompt=prompt,
-                    response_model=MedicalTopic,
-                    model=resolved_model
-                )
+                    response_model=MedicalTopic
+                ),
+                config=config
             )
             
             # Append new response
