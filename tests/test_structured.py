@@ -3,7 +3,7 @@
 
 from typing import List, Optional
 from pydantic import BaseModel
-from openrouter_client import OpenRouterClient, ModelInput
+from orouter.openrouter_client import OpenRouterClient, ModelInput, ModelConfig
 
 # Define Pydantic models for structured output
 class Person(BaseModel):
@@ -45,7 +45,6 @@ class ContactInfo(BaseModel):
 
 class SentimentAnalysis(BaseModel):
     """Analysis of sentiment in text."""
-    text: str
     sentiment: str  # positive, negative, neutral
     confidence: float  # 0.0 to 1.0
     key_phrases: List[str]
@@ -63,9 +62,9 @@ def test_simple_structured():
         input_data = ModelInput(
             user_prompt=prompt,
             response_model=Person,
-            model="sonnet"
         )
-        result = client.generate_structured(input_data)
+        config = ModelConfig(model="llama")
+        result = client.generate_content(input_data, config)
 
         print(f"Prompt: {prompt}")
         print(f"\nStructured Output:")
@@ -98,9 +97,9 @@ def test_complex_structured():
         input_data = ModelInput(
             user_prompt=prompt,
             response_model=Recipe,
-            model="sonnet"
         )
-        result = client.generate_structured(input_data)
+        config = ModelConfig(model="llama")
+        result = client.generate_content(input_data, config)
 
         print(f"Prompt: {prompt}")
         print(f"\nStructured Output:")
@@ -140,9 +139,9 @@ def test_nested_structured():
         input_data = ModelInput(
             user_prompt=prompt,
             response_model=MovieReview,
-            model="sonnet"
         )
-        result = client.generate_structured(input_data)
+        config = ModelConfig(model="llama")
+        result = client.generate_content(input_data, config)
 
         print(f"Prompt: {prompt}")
         print(f"\nStructured Output:")
@@ -184,9 +183,9 @@ def test_list_structured():
         input_data = ModelInput(
             user_prompt=prompt,
             response_model=PeopleList,
-            model="sonnet"
         )
-        result = client.generate_structured(input_data)
+        config = ModelConfig(model="llama")
+        result = client.generate_content(input_data, config)
         results = result.items
 
         print(f"Prompt: {prompt}")
@@ -220,9 +219,9 @@ def test_sentiment_analysis():
         input_data = ModelInput(
             user_prompt=prompt,
             response_model=SentimentAnalysis,
-            model="haiku"
         )
-        result = client.generate_structured(input_data)
+        config = ModelConfig(model="llama")
+        result = client.generate_content(input_data, config)
 
         print(f"Text: {text}")
         print(f"\nStructured Output:")
@@ -254,9 +253,9 @@ def test_retry_on_validation():
         input_data = ModelInput(
             user_prompt=prompt,
             response_model=Person,
-            model="sonnet"
         )
-        result = client.generate_structured(input_data)
+        config = ModelConfig(model="llama")
+        result = client.generate_content(input_data, config)
 
         print(f"Prompt: {prompt}")
         print(f"\nStructured Output (with retries allowed):")

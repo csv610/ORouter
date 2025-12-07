@@ -2,10 +2,13 @@ import sys
 import json
 from datetime import datetime
 from pathlib import Path
-from openrouter_text_client import OpenRouterClient, ModelConfig
+
 from pydantic import BaseModel, Field
 from typing import Optional
 
+import sys
+sys.path.insert(0, '..')
+from orouter.openrouter_client import OpenRouterClient, ModelConfig, ModelInput
 
 class Epidemiology(BaseModel):
     prevalence: Optional[str] = Field(None, description="How common is this condition? Include specific percentages or rates (e.g., '1 in 1000 people', '5% of adults')")
@@ -124,10 +127,15 @@ Provide comprehensive, evidence-based medical information covering:
         print(f"  Querying {model}...", file=sys.stderr)
         
         try:
-            client = OpenRouterClient(config=ModelConfig(model=model, temperature=0.3))
+            client = OpenRouterClient(config=ModelConfig(temperature=0.3))
+            # Resolve model alias if needed
+            resolved_model = client._resolve_model(model)
             response = client.generate_structured(
-                user_prompt=prompt,
-                response_model=MedicalTopic
+                ModelInput(
+                    user_prompt=prompt,
+                    response_model=MedicalTopic,
+                    model=resolved_model
+                )
             )
             
             # Append new response
@@ -149,4 +157,4 @@ Provide comprehensive, evidence-based medical information covering:
             json.dump(output, f, indent=2)
     
     print(f"\nSaved: {json_file}", file=sys.stderr)
-    print(f"Total responses: {len([r for r in output['responses'] if 'data' in r])}", file=sys.stderr)
+    print(f"Total responses: {len([r for r in output['answers'] if 'data' in r])}", file=sys.stderr)

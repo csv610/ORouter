@@ -25,7 +25,7 @@ help:
 	@echo ""
 
 venv:
-	python -m venv orouterenv
+	python3 -m venv orouterenv
 	@echo "✓ Virtual environment created!"
 	@echo "Activate it with: source orouterenv/bin/activate (or orouterenv\\Scripts\\activate on Windows)"
 

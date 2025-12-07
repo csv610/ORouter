@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Type, TypeVar
 from openai import OpenAI
 from pydantic import BaseModel, ValidationError
 
-from image_utils import ImageUtils
+from .image_utils import ImageUtils
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -37,6 +37,7 @@ class ModelInput:
 @dataclass
 class ModelConfig:
     """Configuration for model inference parameters."""
+    model: Optional[str] = None
     temperature: float = 0.7
     max_tokens: Optional[int] = None
     top_p: float = 1.0
@@ -205,6 +206,42 @@ class OpenRouterClient:
         )
 
         return completion.choices[0].message.content
+
+    def generate_content(
+        self,
+        input_data: ModelInput,
+        config: ModelConfig,
+    ) -> str | BaseModel:
+        """Generate content, choosing between text and structured output automatically.
+
+        Decides which generation method to use based on ModelInput:
+        - If response_model is provided: calls generate_structured
+        - Otherwise: calls generate_text
+
+        Args:
+            input_data: ModelInput instance with prompt and optional response_model
+            config: ModelConfig with model selection and inference parameters
+
+        Returns:
+            str if generating text, BaseModel instance if generating structured output
+
+        Raises:
+            ValueError: If user_prompt or model is not provided
+        """
+        if not input_data.user_prompt:
+            raise ValueError("user_prompt must be provided in ModelInput.")
+
+        if not config.model:
+            raise ValueError("model must be provided in ModelConfig.")
+
+        # Set model from config and resolve alias
+        input_data.model = self._resolve_model(config.model)
+        self.default_config = config
+
+        if input_data.response_model:
+            return self.generate_structured(input_data)
+        else:
+            return self.generate_text(input_data)
 
     def generate_structured(
         self,

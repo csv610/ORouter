@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Test script for vision capabilities with OpenRouterClient."""
 
-from openrouter_client import OpenRouterClient, ModelInput
+import sys
+sys.path.insert(0, '/Users/csv610/Projects/ORouter')
+
+from orouter.openrouter_client import OpenRouterClient, ModelInput
 
 def test_vision_with_url():
     """Test vision with a public image URL."""
@@ -13,13 +16,13 @@ def test_vision_with_url():
         client = OpenRouterClient()
         # Using a simple public image
         input_data = ModelInput(
-            prompt="Describe what you see in this image in 2 sentences.",
+            user_prompt="Describe what you see in this image in 2 sentences.",
             image_source="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/1200px-Good_Food_Display_-_NCI_Visuals_Online.jpg",
-            model="sonnet"
+            model="google/gemma-3-27b-it:free"
         )
         response = client.generate_text(input_data)
         print(f"Image URL: https://upload.wikimedia.org/...")
-        print(f"Model: sonnet (Claude Sonnet 4.5)")
+        print(f"Model: gemma27b")
         print(f"Response: {response}\n")
         return True
     except Exception as e:
@@ -38,13 +41,13 @@ def test_vision_with_data_uri():
 
         client = OpenRouterClient()
         input_data = ModelInput(
-            prompt="What color is this image?",
+            user_prompt="What color is this image?",
             image_source=red_pixel_data_uri,
-            model="haiku"
+            model="google/gemma-3-27b-it:free"
         )
         response = client.generate_text(input_data)
         print(f"Image: 1x1 pixel data URI")
-        print(f"Model: haiku (Claude Haiku 4.5)")
+        print(f"Model: gemma27b")
         print(f"Response: {response}\n")
         return True
     except Exception as e:
@@ -54,35 +57,30 @@ def test_vision_with_data_uri():
 def test_vision_with_local_file():
     """Test vision with a local image file."""
     print("=" * 60)
-    print("TEST 3: Vision with Local File")
+    print("TEST 3: Vision with Local File (Taj Mahal)")
     print("=" * 60)
 
     try:
-        # First, let's create a simple test image
-        from PIL import Image, ImageDraw
-        import tempfile
+        import os
 
-        # Create a simple test image (100x100 blue square)
-        img = Image.new('RGB', (100, 100), color='blue')
+        # Use the Taj Mahal image from the data folder
+        taj_mahal_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'Tajmahal.jpg')
 
-        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
-            tmp_path = tmp.name
-            img.save(tmp_path)
+        if not os.path.exists(taj_mahal_path):
+            print(f"ERROR: Image file not found at {taj_mahal_path}\n")
+            return False
 
         client = OpenRouterClient()
         input_data = ModelInput(
-            prompt="What color is this image? Be concise.",
-            image_source=tmp_path,
-            model="haiku"
+            user_prompt="Describe this landmark in detail. What do you see?",
+            image_source=taj_mahal_path,
+            model="google/gemma-3-27b-it:free"
         )
         response = client.generate_text(input_data)
-        print(f"Image: Local file (100x100 blue square)")
-        print(f"Model: haiku (Claude Haiku 4.5)")
+        print(f"Image: Local file (Taj Mahal)")
+        print(f"Model: gemma27b")
         print(f"Response: {response}\n")
 
-        # Clean up
-        import os
-        os.unlink(tmp_path)
         return True
     except Exception as e:
         print(f"ERROR: {e}\n")
@@ -99,13 +97,13 @@ def test_vision_with_system_prompt():
         image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/1200px-Good_Food_Display_-_NCI_Visuals_Online.jpg"
 
         input_data = ModelInput(
-            prompt="What types of food are shown here?",
+            user_prompt="What types of food are shown here?",
             image_source=image_url,
             system_prompt="You are a food expert. Analyze images and describe the nutritional content.",
-            model="sonnet"
+            model="google/gemma-3-27b-it:free"
         )
         response = client.generate_text(input_data)
-        print(f"Model: sonnet (Claude Sonnet 4.5)")
+        print(f"Model: gemma27b")
         print(f"Response: {response}\n")
         return True
     except Exception as e:
@@ -120,20 +118,23 @@ def test_vision_model_variants():
 
     try:
         image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/1200px-Good_Food_Display_-_NCI_Visuals_Online.jpg"
-        models_to_test = ["haiku", "sonnet"]
+        models_to_test = [
+            ("gemma27b-1", "google/gemma-3-27b-it:free"),
+            ("gemma27b-2", "google/gemma-3-27b-it:free")
+        ]
 
-        for model_alias in models_to_test:
+        for model_name, model_id in models_to_test:
             try:
                 client = OpenRouterClient()
                 input_data = ModelInput(
-                    prompt="Briefly describe this image.",
+                    user_prompt="Briefly describe this image.",
                     image_source=image_url,
-                    model=model_alias
+                    model=model_id
                 )
                 response = client.generate_text(input_data)
-                print(f"✓ {model_alias}: Success (response length: {len(response)} chars)")
+                print(f"✓ {model_name}: Success (response length: {len(response)} chars)")
             except Exception as e:
-                print(f"✗ {model_alias}: {str(e)[:80]}")
+                print(f"✗ {model_name}: {str(e)[:80]}")
 
         print()
         return True

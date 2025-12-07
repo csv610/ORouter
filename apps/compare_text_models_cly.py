@@ -1,5 +1,6 @@
 
 import argparse
+
 def main():
     """
     Main function to get a response from OpenRouter.
@@ -96,7 +97,7 @@ Examples:
                 print(f"  - {model}")
             return
         
-        response = client.generate_text(
+        response = client.generate_content(
             user_prompt=args.question,
             verbose=args.verbose
         )
