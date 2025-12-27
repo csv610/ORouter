@@ -2,11 +2,12 @@ import sys
 import json
 from datetime import datetime
 from pathlib import Path
+import time
+import argparse
 
 from pydantic import BaseModel, Field
 from typing import Optional
 
-import sys
 sys.path.insert(0, '..')
 from orouter.openrouter_client import OpenRouterClient, ModelConfig, ModelInput
 
@@ -70,14 +71,43 @@ class MedicalTopic(BaseModel):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python script.py <medical_topic> [model1 model2 ...]")
-        print("Example: python script.py diabetes mistral gpt-4 claude")
-        sys.exit(1)
-    
-    # Parse arguments
-    topic = sys.argv[1]
-    models = sys.argv[2:] if len(sys.argv) > 2 else ["mistral"]
+    parser = argparse.ArgumentParser(
+        description="Generate comprehensive medical information on a topic",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python medtopic_cli.py diabetes mistral
+  python medtopic_cli.py "heart disease" gpt-4 claude
+  python medtopic_cli.py diabetes mistral -s 2.5
+        """
+    )
+
+    # Topic (required positional)
+    parser.add_argument(
+        "topic",
+        type=str,
+        help="Medical topic to research"
+    )
+
+    # Models (optional positional, defaults to mistral)
+    parser.add_argument(
+        "models",
+        nargs="*",
+        help="Models to query (default: mistral)"
+    )
+
+    # Sleep option
+    parser.add_argument(
+        "-s", "--sleep",
+        type=int,
+        default=1,
+        help="Sleep duration in seconds after each LLM response (default: 1)"
+    )
+
+    args = parser.parse_args()
+
+    topic = args.topic
+    models = args.models if args.models else ["mistral"]
     
     prompt = f"""You are a medical expert creating a comprehensive clinical reference on: {topic}
 
@@ -137,14 +167,18 @@ Provide comprehensive, evidence-based medical information covering:
                 ),
                 config=config
             )
-            
+
             # Append new response
             output["answers"].append({
                 "model": model,
                 "timestamp": datetime.now().isoformat(),
                 "data": response.model_dump()
             })
-            
+
+            # Sleep after response
+            if args.sleep > 0:
+                time.sleep(args.sleep)
+
         except Exception as e:
             print(f"  Error with {model}: {e}", file=sys.stderr)
             output["answers"].append({

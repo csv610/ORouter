@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 import re
+import time
 
 from pydantic import BaseModel, Field
 from typing import Optional
@@ -122,9 +123,9 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python nejm_image_challenges_cli.py -i chest_xray.jpg mistral
-  python nejm_image_challenges_cli.py -d /path/to/scans/ gpt-4-vision
-  python nejm_image_challenges_cli.py -r scan_001.jpg:scan_010.jpg claude
+  python nejm_image_challenges_cli.py -i chest_xray.jpg
+  python nejm_image_challenges_cli.py -d /path/to/scans/ -m mistral
+  python nejm_image_challenges_cli.py -r scan_001.jpg:scan_010.jpg -m gpt-4-vision
         """
     )
 
@@ -146,11 +147,20 @@ Examples:
         help="Directory containing images"
     )
 
-    # Model (required positional)
+    # Model (optional)
     parser.add_argument(
-        "model",
+        "-m", "--model",
         type=str,
-        help="Model to use (e.g., 'mistral', 'gpt-4-vision', 'claude')"
+        default="gemma27b",
+        help="Model to use (default: gemma27b)"
+    )
+
+    # Sleep option
+    parser.add_argument(
+        "-s", "--sleep",
+        type=int,
+        default=1,
+        help="Sleep duration in seconds after each LLM response (default: 1)"
     )
 
     args = parser.parse_args()
@@ -235,6 +245,10 @@ Analyze the medical image and provide:
                 "id": image_id,
                 **response.model_dump()
             }
+
+            # Sleep after response
+            if args.sleep > 0:
+                time.sleep(args.sleep)
 
         except Exception as e:
             print(f"  Error analyzing {image_source}: {e}", file=sys.stderr)
